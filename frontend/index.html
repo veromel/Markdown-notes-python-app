@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Notes App</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Markdown Notes App</h1>
+        <h2>Create/Update Note</h2>
+        <input type="text" id="title" placeholder="Title" />
+        <textarea id="content" placeholder="Write your note here..."></textarea>
+        <div class="button-container">
+            <button id="save-note" onclick="saveNote()">Save Note</button>
+            <button id="check-grammar" onclick="checkGrammar()">Check Grammar</button>
+        </div>
+        <h3>Errors:</h3>
+        <div id="errors"></div>
+        <h2>Saved Notes:</h2>
+        <div class="notes-list" id="saved-notes"></div>
+        <div id="note-viewer">
+            <h3>Note Content:</h3>
+            <div id="note-content">
+                <span class="note-title"></span>
+                <span class="note-content"></span>
+            </div>
+            <div class="note-buttons button-container">
+                <button id="edit-note" onclick="editNote()">Edit</button>
+                <button id="delete-note" onclick="deleteNote()">Delete</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
