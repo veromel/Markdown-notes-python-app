@@ -1,6 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
 from src.notes.application.delete.delete_note_service import DeleteNoteService
-from src.notes.infrastructure.repositories.mongo_note_repository import MongoNoteRepository
+from src.notes.infrastructure.repositories.mongo_note_repository import (
+    MongoNoteRepository,
+)
 
 router = APIRouter()
 
@@ -12,8 +14,7 @@ def get_delete_note_service():
 
 @router.delete("/{note_id}")
 async def delete_note(
-        note_id: str,
-        service: DeleteNoteService = Depends(get_delete_note_service)
+    note_id: str, service: DeleteNoteService = Depends(get_delete_note_service)
 ):
     success = await service.delete_note(note_id)
     if not success:

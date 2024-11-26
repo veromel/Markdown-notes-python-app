@@ -15,7 +15,7 @@ class Note(BaseModel):
 
     @classmethod
     def create(cls, title: str, content: str) -> "Note":
-        """ Factory method to create a new note """
+        """Factory method to create a new note"""
         return cls(
             id=NoteID.generate(),
             title=NoteTitle(value=title),
@@ -25,6 +25,6 @@ class Note(BaseModel):
         )
 
     def update_content(self, new_content: str) -> None:
-        """ Update the content of the note and the updated_at timestamp """
+        """Update the content of the note and the updated_at timestamp"""
         self.content = NoteContent(value=new_content)
         self.updated_at = datetime.utcnow()

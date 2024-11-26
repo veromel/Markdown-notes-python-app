@@ -29,8 +29,3 @@ app.add_middleware(
 
 # Incluyendo el enrutador principal
 app.include_router(api_router)
-
-
-
-
-

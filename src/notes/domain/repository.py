@@ -23,4 +23,3 @@ class NoteRepository(ABC):
     @abstractmethod
     async def delete(self, note_id: str) -> None:
         pass
-

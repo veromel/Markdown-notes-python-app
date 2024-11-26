@@ -12,7 +12,7 @@ class MongoNoteRepository:
     async def initialize(self):
         if self.collection is None:
             db = await get_mongo_client()
-            self.collection = db['notes']
+            self.collection = db["notes"]
 
     async def save(self, note: Note) -> None:
         await self.initialize()
@@ -32,8 +32,7 @@ class MongoNoteRepository:
     async def update(self, note: Note) -> bool:
         await self.initialize()
         result = await self.collection.update_one(
-            {"id": str(note.id)},
-            {"$set": note.dict()}
+            {"id": str(note.id)}, {"$set": note.dict()}
         )
         return result.modified_count > 0
 
@@ -41,5 +40,3 @@ class MongoNoteRepository:
         await self.initialize()
         result = await self.collection.delete_one({"id": str(note_id)})
         return result.deleted_count > 0
-
-

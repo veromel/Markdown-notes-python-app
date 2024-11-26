@@ -1,5 +1,7 @@
 from app.http.config import settings
-from src.notes.infrastructure.repositories.mongo_note_repository import MongoNoteRepository
+from src.notes.infrastructure.repositories.mongo_note_repository import (
+    MongoNoteRepository,
+)
 from src.notes.application.create.create_note_service import CreateNoteService
 from src.notes.application.delete.delete_note_service import DeleteNoteService
 from src.notes.application.get.get_note_by_id_service import GetNoteByIdService

@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends
 from typing import List
 from src.notes.application.get.list_notes_service import ListNotesService
 from src.notes.domain.note import Note
-from src.notes.infrastructure.repositories.mongo_note_repository import MongoNoteRepository
+from src.notes.infrastructure.repositories.mongo_note_repository import (
+    MongoNoteRepository,
+)
 
 router = APIRouter()
 
