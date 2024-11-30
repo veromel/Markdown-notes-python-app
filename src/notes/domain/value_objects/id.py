@@ -1,11 +1,11 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, field_validator
 import uuid
 
 
-class NoteID(BaseModel):
-    value: str
+class Id(BaseModel):
+    value: str = Field(...)
 
-    @validator("value")
+    @field_validator("value")
     def validate_id(cls, value):
         try:
             uuid.UUID(value)

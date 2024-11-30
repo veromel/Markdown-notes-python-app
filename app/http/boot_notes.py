@@ -1,4 +1,7 @@
+from fastapi import APIRouter
+
 from app.http.config import settings
+from app.http.notes import list_notes, create_note, get_note, update_note, delete_note
 from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
@@ -19,6 +22,7 @@ class BootNotes:
     def __init__(self):
         self.mongo_client = None
         self.note_repository = None
+        self.api_router = APIRouter()
 
     async def _initialize_mongo_client(self):
         if self.mongo_client is None:

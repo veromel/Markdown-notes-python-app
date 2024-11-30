@@ -1,10 +1,10 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class NoteTitle(BaseModel):
-    value: str
+    value: str = Field(..., max_length=255)
 
-    @validator("value")
+    @field_validator("value")
     def validate_title(cls, value):
         if not value or not isinstance(value, str):
             raise ValueError("Title cannot be empty")

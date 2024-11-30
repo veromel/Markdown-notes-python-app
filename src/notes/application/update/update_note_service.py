@@ -9,7 +9,7 @@ class UpdateNoteService:
     async def update_note(self, note_id: str, title: str, content: str) -> Note:
         note = await self.note_repository.find_by_id(note_id)
         if not note:
-            return None
+            raise ValueError("Note not found")
         note.title = title
         note.content = content
         await self.note_repository.update(note)

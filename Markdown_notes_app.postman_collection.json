@@ -1,0 +1,178 @@
+{
+	"info": {
+		"_postman_id": "3bc2bd70-f15d-4adb-90f6-4c979cebcbd9",
+		"name": "Markdown_notes_app",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37084789"
+	},
+	"item": [
+		{
+			"name": "note",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Titulo de la nota\",\n    \"content\": \"Contenido de la nota.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/notes",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"notes"
+							]
+						},
+						"description": "\n### Save Note\n\nThis endpoint allows you to save a note with a title, content, and HTML content.\n\n**Request Body**\n- title (string, required): The title of the note.\n- content (string, required): The content of the note.\n- html_content (string, required): The HTML content of the note.\n\n**Response**\n- Status: 200 OK\n- Content-Type: application/json\n- title (string): The title of the saved note.\n- content (string): The content of the saved note.\n- html_content (string): The HTML content of the saved note.\n\n"
+					},
+					"response": []
+				},
+				{
+					"name": "list_notes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/notes",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"notes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get_by_id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/notes/bce92d1e-1177-4190-a65a-a955fede5555",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"notes",
+								"bce92d1e-1177-4190-a65a-a955fede5555"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "check_grammar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Nota de Prueba\",\n    \"content\": \"Este es un ejemplo de un texto con un error gramatical.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/check-grammar",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"check-grammar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:8000/notes/bce92d1e-1177-4190-a65a-a955fede5555",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"notes",
+								"bce92d1e-1177-4190-a65a-a955fede5555"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Nuevo título\",\n    \"content\": \"Nuevo contenido de la nota.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/notes/4d577acc-6d4d-4bfa-af82-0d78319488d3",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"notes",
+								"4d577acc-6d4d-4bfa-af82-0d78319488d3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
