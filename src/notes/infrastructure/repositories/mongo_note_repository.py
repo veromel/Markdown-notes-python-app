@@ -1,11 +1,12 @@
 from src.notes.domain.note import Note
+from src.notes.domain.repository import NoteRepository
 from src.notes.infrastructure.db.mongodb import get_mongo_client
 from typing import List, Optional
 from uuid import UUID
 from pydantic import parse_obj_as
 
 
-class MongoNoteRepository:
+class MongoNoteRepository(NoteRepository):
     def __init__(self):
         self.collection = None
 
