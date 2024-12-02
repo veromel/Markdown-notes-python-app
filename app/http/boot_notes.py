@@ -1,7 +1,14 @@
 from fastapi import APIRouter
 
 from app.http.config import settings
-from app.http.notes import list_notes, create_note, get_note, update_note, delete_note
+from app.http.notes import (
+    list_notes,
+    create_note,
+    get_note,
+    update_note,
+    delete_note,
+    check_grammar,
+)
 from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
@@ -40,10 +47,20 @@ class BootNotes:
         self.list_notes_service = ListNotesService(self.note_repository)
         self.update_note_service = UpdateNoteService(self.note_repository)
 
+    async def _initialize_routes(self):
+        # Include route definitions using the same router
+        list_notes.add_routes(self.api_router)
+        create_note.add_routes(self.api_router)
+        get_note.add_routes(self.api_router)
+        update_note.add_routes(self.api_router)
+        delete_note.add_routes(self.api_router)
+        check_grammar.add_routes(self.api_router)
+
     async def boot(self):
         await self._initialize_mongo_client()
         await self._initialize_repositories()
         self._initialize_services()
+        await self._initialize_routes()
         return self
 
 

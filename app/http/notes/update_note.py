@@ -6,8 +6,6 @@ from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
 
-router = APIRouter()
-
 
 class NoteUpdate(BaseModel):
     title: str
@@ -19,7 +17,6 @@ def get_update_note_service():
     return UpdateNoteService(note_repository=repository)
 
 
-@router.put("/{note_id}", response_model=Note)
 async def update_note(
     note_id: str,
     note_data: NoteUpdate,
@@ -29,3 +26,7 @@ async def update_note(
     if not note:
         raise HTTPException(status_code=404, detail="Note not found.")
     return note
+
+
+def add_routes(router: APIRouter):
+    router.put("/notes/{note_id}", response_model=Note)(update_note)

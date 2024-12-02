@@ -2,10 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from app.http.api_router import api_router
 from app.http.boot_notes import boot_notes_instance
 from app.http.config import settings
-from src.notes.infrastructure.language_tool.language_tool import get_language_tool
 
 
 @asynccontextmanager
@@ -28,4 +26,4 @@ app.add_middleware(
 )
 
 # Incluyendo el enrutador principal
-app.include_router(api_router)
+app.include_router(boot_notes_instance.api_router)

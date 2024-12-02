@@ -7,8 +7,6 @@ from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
 
-router = APIRouter()
-
 
 class NoteCreate(BaseModel):
     title: str
@@ -20,7 +18,6 @@ def get_create_note_service():
     return CreateNoteService(note_repository=repository)
 
 
-@router.post("/", response_model=Note)
 async def create_note(
     note_data: NoteCreate, service: CreateNoteService = Depends(get_create_note_service)
 ):
@@ -28,3 +25,7 @@ async def create_note(
     if not note:
         raise HTTPException(status_code=400, detail="Could not create note.")
     return note
+
+
+def add_routes(router: APIRouter):
+    router.post("/notes/", response_model=Note)(create_note)

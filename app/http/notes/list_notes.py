@@ -6,8 +6,6 @@ from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
 
-router = APIRouter()
-
 
 async def get_list_notes_service():
     repository = MongoNoteRepository()
@@ -15,6 +13,9 @@ async def get_list_notes_service():
     return ListNotesService(note_repository=repository)
 
 
-@router.get("/", response_model=List[Note])
 async def list_notes(service: ListNotesService = Depends(get_list_notes_service)):
     return await service.list_notes()
+
+
+def add_routes(router: APIRouter):
+    router.get("/notes/", response_model=List[Note])(list_notes)

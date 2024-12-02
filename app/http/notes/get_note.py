@@ -5,15 +5,12 @@ from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
 
-router = APIRouter()
-
 
 def get_get_note_service():
     repository = MongoNoteRepository()
     return GetNoteByIdService(note_repository=repository)
 
 
-@router.get("/{note_id}", response_model=Note)
 async def get_note(
     note_id: str, service: GetNoteByIdService = Depends(get_get_note_service)
 ):
@@ -21,3 +18,7 @@ async def get_note(
     if not note:
         raise HTTPException(status_code=404, detail="Note not found.")
     return note
+
+
+def add_routes(router: APIRouter):
+    router.get("/notes/{note_id}", response_model=Note)(get_note)
