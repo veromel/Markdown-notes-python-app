@@ -19,22 +19,10 @@ class Dependencies:
     def app(
         mongo_client: AsyncIOMotorClient,
     ) -> [tuple]:
-
         logger = StdoutLogger()
         note_repository = MongoNoteRepository(mongo_client, env.MONGODB_NAME)
-
-        create_note_service = CreateNoteService(note_repository)
-        delete_note_service = DeleteNoteService(note_repository)
-        get_note_by_id_service = GetNoteByIdService(note_repository)
-        list_notes_service = ListNotesService(note_repository)
-        update_note_service = UpdateNoteService(note_repository)
 
         return (
             (Logger, logger),
             (NoteRepository, note_repository),
-            (CreateNoteService, create_note_service),
-            (DeleteNoteService, delete_note_service),
-            (GetNoteByIdService, get_note_by_id_service),
-            (ListNotesService, list_notes_service),
-            (UpdateNoteService, update_note_service),
         )
