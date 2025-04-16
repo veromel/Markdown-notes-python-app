@@ -85,7 +85,7 @@ button:disabled {
     padding-left: 20px;
 }
 
-/* Saved notes list */
+/* Saved routers list */
 .notes-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

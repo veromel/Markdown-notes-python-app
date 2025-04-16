@@ -12,6 +12,7 @@ uvicorn = "^0.32.0"
 language-tool-python = "^2.8.1"
 markdown = "^3.7"
 motor = "^3.6.0"
+inject = "^5.2.1"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -13,7 +13,7 @@ class NoteRepository(ABC):
         pass
 
     @abstractmethod
-    async def find_all(self) -> List[Note]:
+    async def find_all(self) -> List[Note] | None:
         pass
 
     @abstractmethod

@@ -1,9 +1,15 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 import uuid
+from typing import Any
 
 
 class Id(BaseModel):
-    value: str = Field(...)
+    value: str
+
+    def __init__(self, value: str = None, **data: Any):
+        if value is None:
+            value = str(uuid.uuid4())
+        super().__init__(value=value, **data)
 
     @field_validator("value")
     def validate_id(cls, value):
@@ -15,4 +21,4 @@ class Id(BaseModel):
 
     @classmethod
     def generate(cls):
-        return cls(value=str(uuid.uuid4()))
+        return cls(str(uuid.uuid4()))

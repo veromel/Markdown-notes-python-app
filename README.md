@@ -3,10 +3,11 @@
 ## Table of Contents
 
 * [Application Description 📝](#application-description)
+* [Architecture 🏗️](#architecture)
 * [Application Preview 🖼️](#application-preview)
 * [How to Download and Run the Application ⬇️](#how-to-download-and-run-the-application)
 * [API Testing with Postman 🔧](#api-testing-with-postman)
-* [Run Unit Tests ✅](#run-unit-tests)
+* [Run Tests ✅](#run-tests)
 * [Future Improvements 🚀](#future-improvements)
 
 
@@ -18,6 +19,21 @@ This is a simple notes application that allows you to:
 - Check the grammar of the content you are writing.
 
 The application is structured with a hexagonal architecture for practice purposes. It also comes with Docker to facilitate local installation and execution on any machine. Docker will also start a local MongoDB database where the notes you create will be stored. All dependencies are managed through **Poetry**.
+
+## Architecture
+
+The application follows a **Hexagonal Architecture** (also known as Ports and Adapters) with the following components:
+
+- **Domain Layer**: Contains the core business logic with entities, value objects, and repository interfaces.
+- **Application Layer**: Implements use cases through services that orchestrate the domain objects.
+- **Infrastructure Layer**: Provides concrete implementations for external concerns like databases and APIs.
+
+### Key Features:
+
+- **Dependency Injection**: Utilizes the `inject` library to manage dependencies, making the code more testable and maintainable.
+- **Value Objects**: Implements domain concepts as immutable objects with built-in validation.
+- **Repository Pattern**: Abstracts data access behind interfaces, allowing for different implementations.
+- **MongoDB Integration**: Uses Motor for asynchronous MongoDB access with proper UUID handling.
 
 ## Application Preview
 
@@ -62,17 +78,37 @@ You can import this collection into Postman to easily interact with the API endp
 
 Once imported, you'll be able to test various functionalities such as creating, retrieving, updating, and deleting notes using the endpoints provided.
 
-## Run Unit Tests
+## Run Tests
 
-Run the unit tests using **pytest**:
+The application includes both unit tests and integration tests to ensure code quality and functionality.
+
+### Run Unit Tests
+
+Run the unit tests to verify individual components:
 
 ```bash
-  pytest -v
+pytest tests/unit -v
 ```
 
-This will execute all tests and provide a summary of the results.
+### Run Integration Tests
+
+Run integration tests to verify the application works correctly with MongoDB:
+
+```bash
+pytest tests/integration -v
+```
+
+### Run All Tests
+
+Run all tests with coverage report:
+
+```bash
+pytest -v
+```
 
 ## Future Improvements
 
-- Additionally, a **users module** will be added later to enable user login so that each user can have their own notes.
+- Add a **users module** to enable user login so that each user can have their own notes.
+- Implement more advanced text analysis features.
+- Add tagging and categorization for notes.
 

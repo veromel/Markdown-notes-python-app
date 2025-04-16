@@ -2,11 +2,23 @@ const apiUrl = "http://127.0.0.1:8000";
 
 let currentNoteId = null;
 
+// Función de utilidad para extraer el ID real
+function extractId(noteObj) {
+    if (noteObj && typeof noteObj === 'object' && noteObj.value) {
+        return noteObj.value;
+    }
+    if (typeof noteObj === 'string') {
+        return noteObj;
+    }
+    console.error("ID inválido:", noteObj);
+    return String(noteObj);
+}
+
 async function checkGrammar() {
     const content = document.getElementById("content").value;
 
     try {
-        const response = await fetch(`${apiUrl}/check-grammar`, {
+        const response = await fetch(`${apiUrl}/api/v1/notes/${currentNoteId || "grammar"}/check-grammar`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ content }),
@@ -31,7 +43,7 @@ async function saveNote() {
     const content = document.getElementById("content").value;
 
     const method = currentNoteId ? "PUT" : "POST";
-    const url = currentNoteId ? `${apiUrl}/notes/${currentNoteId}` : `${apiUrl}/notes`;
+    const url = currentNoteId ? `${apiUrl}/api/v1/notes/${currentNoteId}` : `${apiUrl}/api/v1/notes`;
 
     try {
         const response = await fetch(url, {
@@ -54,7 +66,7 @@ async function saveNote() {
 
 async function loadNotes() {
     try {
-        const response = await fetch(`${apiUrl}/notes`);
+        const response = await fetch(`${apiUrl}/api/v1/notes`);
         if (response.ok) {
             const notes = await response.json();
             const savedNotesDiv = document.getElementById("saved-notes");
@@ -63,9 +75,14 @@ async function loadNotes() {
             notes.forEach(note => {
                 const noteButton = document.createElement("button");
                 noteButton.className = "note-item";
-                noteButton.innerText = note.title;
-                noteButton.setAttribute("data-id", note.id); // Añadir identificador
-                noteButton.onclick = () => viewNoteContent(note.id);
+                // Extraer el valor del título si es un objeto
+                const titleText = note.title && typeof note.title === 'object' ? note.title.value : note.title;
+                noteButton.innerText = titleText;
+                
+                // Extraer el ID correctamente
+                const noteId = extractId(note.id);
+                noteButton.setAttribute("data-id", noteId);
+                noteButton.onclick = () => viewNoteContent(noteId);
                 savedNotesDiv.appendChild(noteButton);
             });
         } else {
@@ -78,12 +95,17 @@ async function loadNotes() {
 
 async function viewNoteContent(note_id) {
     try {
-        const response = await fetch(`${apiUrl}/notes/${note_id}`);
+        const response = await fetch(`${apiUrl}/api/v1/notes/${note_id}`);
         if (response.ok) {
             const data = await response.json();
             const noteContentDiv = document.getElementById("note-content");
-            noteContentDiv.querySelector(".note-title").innerText = `Title: ${data.title}`;
-            noteContentDiv.querySelector(".note-content").innerText = `Content: ${data.content}`;
+            
+            // Extraer el valor del título y contenido si son objetos
+            const titleText = data.title && typeof data.title === 'object' ? data.title.value : data.title;
+            const contentText = data.content && typeof data.content === 'object' ? data.content.value : data.content;
+            
+            noteContentDiv.querySelector(".note-title").innerText = `Title: ${titleText}`;
+            noteContentDiv.querySelector(".note-content").innerText = `Content: ${contentText}`;
             currentNoteId = note_id;
 
             // Resaltar la nota seleccionada
@@ -100,7 +122,7 @@ async function deleteNote() {
     if (!currentNoteId) return;
 
     try {
-        const response = await fetch(`${apiUrl}/notes/${currentNoteId}`, {
+        const response = await fetch(`${apiUrl}/api/v1/notes/${currentNoteId}`, {
             method: "DELETE",
         });
 

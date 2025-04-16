@@ -1,3 +1,5 @@
+from typing import TypeVar, ClassVar
+
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -5,26 +7,36 @@ from src.notes.domain.value_objects.content import NoteContent
 from src.notes.domain.value_objects.id import Id
 from src.notes.domain.value_objects.title import NoteTitle
 
+# Crear un TypeVar para Note
+T = TypeVar("T", bound="Note")
+
 
 class Note(BaseModel):
     id: Id
     title: NoteTitle
     content: NoteContent
     created_at: datetime
-    updated_at: datetime
+    updated_at: datetime | None
 
     @classmethod
-    def create(cls, title: str, content: str) -> "Note":
-        """Factory method to create a new note"""
+    def create(
+        cls,
+        id: str,
+        title: str,
+        content: str,
+    ) -> T:
         return cls(
-            id=Id.generate(),
+            id=Id(id),
             title=NoteTitle(value=title),
             content=NoteContent(value=content),
             created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
+            updated_at=None,
         )
 
+    def update_title(self, new_title: str) -> None:
+        self.title = NoteTitle(value=new_title)
+        self.updated_at = datetime.utcnow()
+
     def update_content(self, new_content: str) -> None:
-        """Update the content of the note and the updated_at timestamp"""
         self.content = NoteContent(value=new_content)
         self.updated_at = datetime.utcnow()

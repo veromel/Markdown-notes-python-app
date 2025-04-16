@@ -1,43 +1,51 @@
+from motor.motor_asyncio import AsyncIOMotorClient
+from bson import Binary
+
 from src.notes.domain.note import Note
 from src.notes.domain.repository import NoteRepository
-from src.notes.infrastructure.db.mongodb import get_mongo_client
 from typing import List, Optional
 from uuid import UUID
-from pydantic import parse_obj_as
+
+from src.notes.infrastructure.repositories.schema import NoteSchema
 
 
 class MongoNoteRepository(NoteRepository):
-    def __init__(self):
-        self.collection = None
-
-    async def initialize(self):
-        if self.collection is None:
-            db = await get_mongo_client()
-            self.collection = db["notes"]
+    def __init__(self, client: AsyncIOMotorClient, mongodb_name: str):
+        self.database = client[mongodb_name]
+        self.collection = self.database["notes"]
 
     async def save(self, note: Note) -> None:
-        await self.initialize()
-        await self.collection.insert_one(note.dict())
+        doc = NoteSchema.to_mongo(note)
+        await self.collection.insert_one(doc)
 
-    async def find_by_id(self, note_id: UUID) -> Optional[Note]:
-        await self.initialize()
-        note_data = await self.collection.find_one({"id": str(note_id)})
-        return Note.parse_obj(note_data) if note_data else None
+    async def find_by_id(self, note_id: str) -> Optional[Note]:
+        uuid_obj = UUID(note_id)
+        binary_uuid = Binary.from_uuid(uuid_obj)
+
+        note_data = await self.collection.find_one({"_id": binary_uuid})
+        return NoteSchema.to_domain(note_data)
 
     async def find_all(self) -> List[Note]:
-        await self.initialize()
         notes_cursor = self.collection.find()
         notes_data = await notes_cursor.to_list(length=None)
-        return parse_obj_as(List[Note], notes_data)
+        return [
+            NoteSchema.to_domain(note_data) for note_data in notes_data if note_data
+        ]
 
-    async def update(self, note: Note) -> bool:
-        await self.initialize()
-        result = await self.collection.update_one(
-            {"id": str(note.id)}, {"$set": note.dict()}
-        )
-        return result.modified_count > 0
+    async def update(self, note: Note) -> None:
+        doc = NoteSchema.to_mongo(note)
+        binary_id = doc.pop("_id")
 
-    async def delete(self, note_id: UUID) -> bool:
-        await self.initialize()
-        result = await self.collection.delete_one({"id": str(note_id)})
-        return result.deleted_count > 0
+        update_data = {
+            "title": note.title.value,
+            "content": note.content.value,
+            "updated_at": note.updated_at,
+        }
+
+        await self.collection.update_one({"_id": binary_id}, {"$set": update_data})
+
+    async def delete(self, note_id: str) -> None:
+        uuid_obj = UUID(note_id)
+        binary_uuid = Binary.from_uuid(uuid_obj)
+
+        await self.collection.delete_one({"_id": binary_uuid})
