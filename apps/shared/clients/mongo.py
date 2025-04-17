@@ -7,7 +7,7 @@ class MongoClient:
     def __new__(cls) -> AsyncIOMotorClient:
         try:
             client = AsyncIOMotorClient(
-                env.MONGODB_URI,
+                env.MONGODB_URL,
                 uuidRepresentation="standard",
                 maxPoolSize=50,
                 minPoolSize=10,

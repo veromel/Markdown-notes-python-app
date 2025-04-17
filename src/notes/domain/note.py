@@ -1,36 +1,32 @@
 from typing import TypeVar, ClassVar
-
-from pydantic import BaseModel
 from datetime import datetime
+from dataclasses import dataclass, field
 
 from src.notes.domain.value_objects.content import NoteContent
 from src.notes.domain.value_objects.id import Id
 from src.notes.domain.value_objects.title import NoteTitle
 
-# Crear un TypeVar para Note
-T = TypeVar("T", bound="Note")
 
-
-class Note(BaseModel):
+@dataclass
+class Note:
     id: Id
     title: NoteTitle
     content: NoteContent
-    created_at: datetime
-    updated_at: datetime | None
+    user_id: str
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = None
 
-    @classmethod
-    def create(
-        cls,
-        id: str,
-        title: str,
-        content: str,
-    ) -> T:
-        return cls(
-            id=Id(id),
+    def __post_init__(self):
+        if self.updated_at is None:
+            self.updated_at = self.created_at
+
+    @staticmethod
+    def create(title: str, content: str, user_id: str, note_id: str = None) -> "Note":
+        return Note(
+            id=Id(note_id),
             title=NoteTitle(value=title),
             content=NoteContent(value=content),
-            created_at=datetime.utcnow(),
-            updated_at=None,
+            user_id=user_id,
         )
 
     def update_title(self, new_title: str) -> None:

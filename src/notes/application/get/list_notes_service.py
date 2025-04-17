@@ -10,5 +10,8 @@ class ListNotesService:
     def __init__(self, note_repository: NoteRepository):
         self.note_repository = note_repository
 
-    async def __call__(self) -> List[Note]:
-        return await self.note_repository.find_all()
+    async def __call__(self, user_id: str = None) -> List[Note]:
+        if user_id:
+            return await self.note_repository.find_by_user_id(user_id)
+        else:
+            return await self.note_repository.find_all()

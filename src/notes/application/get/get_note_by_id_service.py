@@ -1,5 +1,6 @@
 from src.notes.domain.note import Note
 from src.notes.domain.repository import NoteRepository
+from src.notes.domain.value_objects.id import Id
 from typing import Optional
 import inject
 
@@ -10,4 +11,4 @@ class GetNoteByIdService:
         self.note_repository = note_repository
 
     async def __call__(self, note_id: str) -> Optional[Note]:
-        return await self.note_repository.find_by_id(note_id)
+        return await self.note_repository.find_by_id(Id(note_id))

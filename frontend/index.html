@@ -8,28 +8,76 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="container">
+    <!-- Contenedor de autenticación -->
+    <div class="container auth-container" id="auth-container">
         <h1>Markdown Notes App</h1>
-        <h2>Create/Update Note</h2>
-        <input type="text" id="title" placeholder="Title" />
-        <textarea id="content" placeholder="Write your note here..."></textarea>
-        <div class="button-container">
-            <button id="save-note" onclick="saveNote()">Save Note</button>
-            <button id="check-grammar" onclick="checkGrammar()">Check Grammar</button>
+        
+        <div class="auth-tabs">
+            <button id="login-tab" class="auth-tab active" onclick="showLoginForm()">Iniciar Sesión</button>
+            <button id="register-tab" class="auth-tab" onclick="showRegisterForm()">Registrarse</button>
         </div>
-        <h3>Errors:</h3>
-        <div id="errors"></div>
-        <h2>Saved Notes:</h2>
+        
+        <!-- Formulario de login -->
+        <div id="login-form" class="auth-form">
+            <h2>Iniciar Sesión</h2>
+            <input type="email" id="login-email" placeholder="Email" />
+            <input type="password" id="login-password" placeholder="Contraseña" />
+            <div class="button-container">
+                <button id="login-button" onclick="login()">Iniciar Sesión</button>
+            </div>
+            <div id="login-error" class="error-message"></div>
+        </div>
+        
+        <!-- Formulario de registro -->
+        <div id="register-form" class="auth-form" style="display: none;">
+            <h2>Crear Nueva Cuenta</h2>
+            <input type="text" id="register-name" placeholder="Nombre" />
+            <input type="email" id="register-email" placeholder="Email" />
+            <input type="password" id="register-password" placeholder="Contraseña" />
+            <div class="button-container">
+                <button id="register-button" onclick="register()">Registrarse</button>
+            </div>
+            <div id="register-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal de la aplicación (se mostrará después de iniciar sesión) -->
+    <div class="container main-container" id="main-container" style="display: none;">
+        <header class="app-header">
+            <h1>Markdown Notes App</h1>
+            <div class="user-info">
+                <span id="user-name">Usuario</span>
+                <button id="logout-button" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <div class="note-editor">
+            <h2>Crear/Editar Nota</h2>
+            <input type="text" id="note-title" placeholder="Título" />
+            <textarea id="note-body" placeholder="Escribe tu nota aquí..."></textarea>
+            <div class="button-container">
+                <button id="save-note" onclick="saveNote()">Guardar Nota</button>
+                <button id="check-grammar" onclick="checkGrammar()">Revisar Gramática</button>
+                <button id="new-button" onclick="newNote()">Nueva Nota</button>
+            </div>
+        </div>
+
+        <div id="error-container" class="error-container" style="display: none;">
+            <h3>Errores:</h3>
+            <div id="errors"></div>
+        </div>
+
+        <h2>Notas Guardadas:</h2>
         <div class="notes-list" id="saved-notes"></div>
         <div id="note-viewer">
-            <h3>Note Content:</h3>
+            <h3>Contenido de la Nota:</h3>
             <div id="note-content">
                 <span class="note-title"></span>
                 <span class="note-content"></span>
             </div>
             <div class="note-buttons button-container">
-                <button id="edit-note" onclick="editNote()">Edit</button>
-                <button id="delete-note" onclick="deleteNote()">Delete</button>
+                <button id="edit-note" onclick="editNote()">Editar</button>
+                <button id="delete-note" onclick="deleteNote()">Eliminar</button>
             </div>
         </div>
     </div>

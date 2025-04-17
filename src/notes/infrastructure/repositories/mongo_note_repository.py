@@ -1,11 +1,12 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import Binary
+from typing import List, Optional
+from uuid import UUID
+from pymongo.collection import Collection
 
 from src.notes.domain.note import Note
 from src.notes.domain.repository import NoteRepository
-from typing import List, Optional
-from uuid import UUID
-
+from src.notes.domain.value_objects.id import Id
 from src.notes.infrastructure.repositories.schema import NoteSchema
 
 
@@ -16,14 +17,14 @@ class MongoNoteRepository(NoteRepository):
 
     async def save(self, note: Note) -> None:
         doc = NoteSchema.to_mongo(note)
-        await self.collection.insert_one(doc)
+        await self.collection.replace_one({"_id": doc["_id"]}, doc, upsert=True)
 
-    async def find_by_id(self, note_id: str) -> Optional[Note]:
-        uuid_obj = UUID(note_id)
+    async def find_by_id(self, id: Id) -> Optional[Note]:
+        uuid_obj = UUID(str(id.value))
         binary_uuid = Binary.from_uuid(uuid_obj)
 
         note_data = await self.collection.find_one({"_id": binary_uuid})
-        return NoteSchema.to_domain(note_data)
+        return NoteSchema.to_domain(note_data) if note_data else None
 
     async def find_all(self) -> List[Note]:
         notes_cursor = self.collection.find()
@@ -49,3 +50,10 @@ class MongoNoteRepository(NoteRepository):
         binary_uuid = Binary.from_uuid(uuid_obj)
 
         await self.collection.delete_one({"_id": binary_uuid})
+
+    async def find_by_user_id(self, user_id: str) -> List[Note]:
+        notes_cursor = self.collection.find({"user_id": user_id})
+        notes_data = await notes_cursor.to_list(length=None)
+        return [
+            NoteSchema.to_domain(note_data) for note_data in notes_data if note_data
+        ]
