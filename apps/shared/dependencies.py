@@ -1,10 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from src.notes.application.create.create_note_service import CreateNoteService
-from src.notes.application.delete.delete_note_service import DeleteNoteService
-from src.notes.application.get.get_note_by_id_service import GetNoteByIdService
-from src.notes.application.get.list_notes_service import ListNotesService
-from src.notes.application.update.update_note_service import UpdateNoteService
 from src.notes.domain.repository import NoteRepository
 from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
