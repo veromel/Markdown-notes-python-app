@@ -1,7 +1,10 @@
 import pytest
 from unittest.mock import AsyncMock
+import uuid
 from src.notes.application.delete.delete_note_service import DeleteNoteService
 from src.notes.domain.repository import NoteRepository
+from src.notes.domain.value_objects.id import Id
+from src.shared.domain.exceptions import AuthorizationException, NotFoundException
 
 
 @pytest.mark.unit
@@ -13,26 +16,57 @@ class TestDeleteNoteService:
 
     @pytest.mark.asyncio
     async def test_delete_note_successful(self, note):
-        # Arrange
         sample_note = note()
         note_id = str(sample_note.id.value)
+        user_id = sample_note.user_id
 
-        # Act
-        await self.service(note_id)
+        self.repository.find_by_id.return_value = sample_note
 
-        # Assert
+        await self.service(note_id, user_id)
+
+        self.repository.find_by_id.assert_called_once_with(Id(note_id))
         self.repository.delete.assert_called_once_with(note_id)
 
     @pytest.mark.asyncio
+    async def test_delete_note_with_invalid_user_id(self, note):
+        sample_note = note(user_id="user-1")
+        note_id = str(sample_note.id.value)
+        invalid_user_id = "user-2"
+
+        self.repository.find_by_id.return_value = sample_note
+
+        with pytest.raises(AuthorizationException) as excinfo:
+            await self.service(note_id, invalid_user_id)
+
+        assert isinstance(excinfo.value, AuthorizationException)
+        self.repository.find_by_id.assert_called_once_with(Id(note_id))
+        self.repository.delete.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_delete_note_not_found(self):
+        note_id = str(uuid.uuid4())
+        user_id = "test-user-id"
+
+        self.repository.find_by_id.return_value = None
+
+        with pytest.raises(NotFoundException) as excinfo:
+            await self.service(note_id, user_id)
+
+        assert isinstance(excinfo.value, NotFoundException)
+        self.repository.find_by_id.assert_called_once_with(Id(note_id))
+        self.repository.delete.assert_not_called()
+
+    @pytest.mark.asyncio
     async def test_delete_note_with_exception(self, note):
-        # Arrange
         sample_note = note()
         note_id = str(sample_note.id.value)
-        self.repository.delete.side_effect = Exception("Error al eliminar la nota")
+        user_id = sample_note.user_id
 
-        # Act & Assert
+        self.repository.find_by_id.return_value = sample_note
+        self.repository.delete.side_effect = Exception("Error deleting note")
+
         with pytest.raises(Exception) as excinfo:
-            await self.service(note_id)
+            await self.service(note_id, user_id)
 
-        assert "Error al eliminar la nota" in str(excinfo.value)
+        assert "Error deleting note" in str(excinfo.value)
         self.repository.delete.assert_called_once_with(note_id)

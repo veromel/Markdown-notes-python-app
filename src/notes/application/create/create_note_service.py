@@ -12,19 +12,15 @@ class CreateNoteService:
         self.note_repository = note_repository
 
     async def __call__(self, title: str, content: str, user_id: str) -> Note:
-        """Crea una nueva nota asociada a un usuario específico"""
-        # Validamos los datos
         if not title:
-            raise ValidationException("El título no puede estar vacío")
+            raise ValidationException("Title can not be empty")
         if not content:
-            raise ValidationException("El contenido no puede estar vacío")
+            raise ValidationException("Content can not be empty")
         if not user_id:
-            raise ValidationException("El ID de usuario no puede estar vacío")
+            raise ValidationException("User_id can not be empty")
 
-        # Creamos la nota con el factory method
         note = Note.create(title=title, content=content, user_id=user_id)
 
-        # Guardamos la nota
         await self.note_repository.save(note)
 
         return note

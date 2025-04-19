@@ -12,6 +12,6 @@ class GetNotesByUser:
 
     async def execute(self, user_id: str) -> List[Note]:
         if not user_id:
-            raise ValidationException("El ID de usuario no puede estar vacío")
+            raise ValidationException("User_id can not be empty")
 
         return await self.note_repository.find_by_user_id(user_id)

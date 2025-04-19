@@ -20,7 +20,7 @@ class RegisterUserService:
                 Email(input_dto.email)
             )
             if existing_user:
-                raise ValidationException("Ya existe un usuario con ese email")
+                raise ValidationException("A user with this email already exists")
 
             user = User.create(
                 email=input_dto.email,
@@ -41,6 +41,6 @@ class RegisterUserService:
         except ValidationException:
             raise
         except Exception as e:
-            print(f"Error en RegisterUserService: {str(e)}")
+            print(f"Error in RegisterUserService: {str(e)}")
             print(traceback.format_exc())
             raise

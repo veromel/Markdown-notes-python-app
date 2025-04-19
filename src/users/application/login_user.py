@@ -21,10 +21,10 @@ class LoginUserService:
         try:
             user = await self.user_repository.find_by_email(Email(input_dto.email))
             if not user:
-                raise ValidationException("Credenciales incorrectas")
+                raise ValidationException("Wrong credentials")
 
             if not user.password.check(input_dto.password):
-                raise ValidationException("Credenciales incorrectas")
+                raise ValidationException("Wrong credentials")
 
             token = self.auth_service.generate_token(user)
 
@@ -42,6 +42,6 @@ class LoginUserService:
         except ValidationException:
             raise
         except Exception as e:
-            print(f"Error en LoginUserService: {str(e)}")
+            print(f"Error in LoginUserService: {str(e)}")
             print(traceback.format_exc())
             raise

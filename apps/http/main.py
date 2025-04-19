@@ -7,8 +7,5 @@ if __name__ == "__main__":
         "apps.http.apps:create_app",
         host=env.HOST,
         port=int(env.PORT),
-        # reload=env.DEBUG,
-        # log_level=env.LOG_LEVEL,
-        # log_config=LOGGING_CONFIG,
         factory=True,
     )

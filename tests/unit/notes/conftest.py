@@ -3,8 +3,6 @@ Fixtures para tests unitarios de notas
 """
 
 import pytest
-from datetime import datetime
-from typing import Optional, Callable, Any
 
 from src.notes.domain.note import Note
 from src.notes.domain.value_objects.id import Id
@@ -18,10 +16,11 @@ def note(faker):
         note_id = kwargs.get("id") or Id.generate().value
         title_value = kwargs.get("title") or faker.sentence()
         content_value = kwargs.get("content") or faker.paragraph()
-        created_at = kwargs.get("created_at") or datetime.utcnow()
-        updated_at = kwargs.get("updated_at") or None
+        user_id = kwargs.get("user_id") or "test-user-id"
 
-        return Note.create(id=note_id, title=title_value, content=content_value)
+        return Note.create(
+            title=title_value, content=content_value, user_id=user_id, note_id=note_id
+        )
 
     return _create
 
@@ -34,7 +33,14 @@ def notes(faker):
             note_id = kwargs.get("id") or Id.generate().value
             title_value = kwargs.get("title") or faker.sentence()
             content_value = kwargs.get("content") or faker.paragraph()
-            note = Note.create(id=note_id, title=title_value, content=content_value)
+            user_id = kwargs.get("user_id") or "test-user-id"
+
+            note = Note.create(
+                title=title_value,
+                content=content_value,
+                user_id=user_id,
+                note_id=note_id,
+            )
             result.append(note)
 
         return result

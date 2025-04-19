@@ -18,17 +18,17 @@ async def get_current_user_id(token: str = Depends(oauth2_scheme)):
         if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido o expirado",
+                detail="Invalid or expired token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
         return user_id
     except Exception as e:
-        print(f"Error al obtener user_id del token: {str(e)}")
+        print(f"Error getting user_id from token: {str(e)}")
         print(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Error con el token: {str(e)}",
+            detail=f"Error with token: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -41,16 +41,16 @@ async def get_current_user(user_id: str = Depends(get_current_user_id)):
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Usuario no encontrado",
+                detail="User not found",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
         return user
     except Exception as e:
-        print(f"Error al obtener usuario actual: {str(e)}")
+        print(f"Error getting current user: {str(e)}")
         print(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Error al obtener usuario: {str(e)}",
+            detail=f"Error getting user: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )

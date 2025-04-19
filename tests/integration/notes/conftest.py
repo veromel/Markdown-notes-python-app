@@ -11,7 +11,6 @@ from src.notes.domain.value_objects.id import Id
 
 @pytest.fixture
 def note_repository(mongo_client, default_mongo_database) -> NoteRepository:
-    """Repositorio MongoNoteRepository para los tests"""
     print(f"🔧 Creando repositorio: {default_mongo_database}")
     repo = MongoNoteRepository(client=mongo_client, mongodb_name=default_mongo_database)
     return repo
@@ -23,8 +22,11 @@ def note(faker):
         note_id = kwargs.get("id") or Id.generate().value
         title_value = kwargs.get("title") or faker.sentence()
         content_value = kwargs.get("content") or faker.paragraph()
+        user_id = kwargs.get("user_id") or "test-user-id"
 
-        note = Note.create(id=note_id, title=title_value, content=content_value)
+        note = Note.create(
+            title=title_value, content=content_value, user_id=user_id, note_id=note_id
+        )
         return note
 
     return _create
@@ -38,7 +40,14 @@ def notes(faker):
             note_id = kwargs.get("id") or Id.generate().value
             title_value = kwargs.get("title") or faker.sentence()
             content_value = kwargs.get("content") or faker.paragraph()
-            note = Note.create(id=note_id, title=title_value, content=content_value)
+            user_id = kwargs.get("user_id") or "test-user-id"
+
+            note = Note.create(
+                title=title_value,
+                content=content_value,
+                user_id=user_id,
+                note_id=note_id,
+            )
             result.append(note)
         return result
 
