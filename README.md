@@ -4,6 +4,7 @@
 
 * [Application Description 📝](#application-description)
 * [Architecture 🏗️](#architecture)
+* [Key Features ✨](#key-features)
 * [Application Preview 🖼️](#application-preview)
 * [How to Download and Run the Application ⬇️](#how-to-download-and-run-the-application)
 * [API Testing with Postman 🔧](#api-testing-with-postman)
@@ -13,12 +14,14 @@
 
 ## Application Description
 
-This is a simple notes application that allows you to:
+This is a Markdown notes application that allows users to:
 
-- Save, edit, retrieve, and delete notes.
-- Check the grammar of the content you are writing.
+- Create an account and log in securely
+- Save, edit, retrieve, and delete personal notes
+- Check grammar in your notes content
+- Ensure privacy by only accessing your own notes
 
-The application is structured with a hexagonal architecture for practice purposes. It also comes with Docker to facilitate local installation and execution on any machine. Docker will also start a local MongoDB database where the notes you create will be stored. All dependencies are managed through **Poetry**.
+The application is structured using a hexagonal architecture for better separation of concerns. It comes with Docker to facilitate local installation and execution on any machine. Docker will also start a local MongoDB database where users and notes will be stored. All dependencies are managed through **Poetry**.
 
 ## Architecture
 
@@ -28,16 +31,24 @@ The application follows a **Hexagonal Architecture** (also known as Ports and Ad
 - **Application Layer**: Implements use cases through services that orchestrate the domain objects.
 - **Infrastructure Layer**: Provides concrete implementations for external concerns like databases and APIs.
 
-### Key Features:
+## Key Features
 
-- **Dependency Injection**: Utilizes the `inject` library to manage dependencies, making the code more testable and maintainable.
-- **Value Objects**: Implements domain concepts as immutable objects with built-in validation.
-- **Repository Pattern**: Abstracts data access behind interfaces, allowing for different implementations.
-- **MongoDB Integration**: Uses Motor for asynchronous MongoDB access with proper UUID handling.
+- **User Authentication**: Secure user registration and login with proper authorization checks
+- **Note Management**: Create, read, update, and delete notes with Markdown support
+- **Grammar Checking**: Built-in grammar verification for note content
+- **Security**: Authorization system that ensures users can only access their own notes
+- **Dependency Injection**: Utilizes the `inject` library to manage dependencies, making the code more testable and maintainable
+- **Value Objects**: Implements domain concepts as immutable objects with built-in validation
+- **Repository Pattern**: Abstracts data access behind interfaces, allowing for different implementations
+- **MongoDB Integration**: Uses Motor for asynchronous MongoDB access with proper UUID handling
 
 ## Application Preview
 
-![preview.png](preview.png)
+### Login Screen
+![Login Screen](pantalla_acceso.png)
+
+### Main Notes Interface
+![Main Interface](pantalla_principal.png)
 
 ## How to Download and Run the Application
 
@@ -61,13 +72,18 @@ The application follows a **Hexagonal Architecture** (also known as Ports and Ad
    - Open the `index.html` file in a **Firefox** browser.
    - Note: Currently, it does not work properly in Chrome due to certain compatibility issues.
 
+4. **Create an account:**
+   
+   - Register with your email and password on the signup page
+   - Log in to access your personal notes dashboard
+
 ## API Testing with Postman
 
 To test the API, you can use the Postman collection included in the project:
 
 - [Download Postman Collection](Markdown_notes_app.postman_collection.json)
 
-You can import this collection into Postman to easily interact with the API endpoints defined.
+You can import this collection into Postman to easily interact with the API endpoints defined, including both user management and note operations.
 
 ### Importing into Postman
 
@@ -76,7 +92,10 @@ You can import this collection into Postman to easily interact with the API endp
 3. Select `Upload Files`.
 4. Choose `Markdown_notes_app.postman_collection.json` from the project root directory.
 
-Once imported, you'll be able to test various functionalities such as creating, retrieving, updating, and deleting notes using the endpoints provided.
+Once imported, you'll be able to test various functionalities:
+- User registration and authentication
+- Creating, retrieving, updating, and deleting notes
+- Grammar checking
 
 ## Run Tests
 
@@ -108,7 +127,8 @@ pytest -v
 
 ## Future Improvements
 
-- Add a **users module** to enable user login so that each user can have their own notes.
-- Implement more advanced text analysis features.
-- Add tagging and categorization for notes.
+- Implement note sharing between users
+- Add tagging and categorization for notes
+- Implement markdown preview functionality
+- Add support for file attachments
 
