@@ -5,7 +5,7 @@ from src.notes.domain.note import Note
 from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )
-from src.notes.domain.repository import NoteRepository
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.notes.domain.value_objects.id import Id
 
 

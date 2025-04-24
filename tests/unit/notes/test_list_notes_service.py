@@ -1,8 +1,9 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
-from src.notes.application.get.list_notes_service import ListNotesService
-from src.notes.domain.repository import NoteRepository
+from src.notes.application.services.list_notes_service import ListNotesService
+from src.notes.application.mappers.note_mapper import NoteMapper
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.shared.domain.exceptions import ValidationException
 
 
@@ -22,8 +23,19 @@ class TestListNotesService:
 
         result = await self.service.list_all()
 
-        assert result == existing_notes
-        assert len(result) == count
+        # Transformamos los objetos de dominio a DTOs para la comparación
+        expected_dtos = NoteMapper.to_dto_list(existing_notes)
+
+        # Verificamos cada elemento
+        assert len(result) == len(expected_dtos)
+        for i in range(len(result)):
+            assert result[i].id == expected_dtos[i].id
+            assert result[i].title == expected_dtos[i].title
+            assert result[i].content == expected_dtos[i].content
+            assert result[i].user_id == expected_dtos[i].user_id
+            assert result[i].created_at == expected_dtos[i].created_at
+            assert result[i].updated_at == expected_dtos[i].updated_at
+
         self.repository.find_all.assert_called_once()
         self.repository.find_by_user_id.assert_not_called()
 
@@ -36,8 +48,19 @@ class TestListNotesService:
 
         result = await self.service(user_id)
 
-        assert result == existing_notes
-        assert len(result) == count
+        # Transformamos los objetos de dominio a DTOs para la comparación
+        expected_dtos = NoteMapper.to_dto_list(existing_notes)
+
+        # Verificamos cada elemento
+        assert len(result) == len(expected_dtos)
+        for i in range(len(result)):
+            assert result[i].id == expected_dtos[i].id
+            assert result[i].title == expected_dtos[i].title
+            assert result[i].content == expected_dtos[i].content
+            assert result[i].user_id == expected_dtos[i].user_id
+            assert result[i].created_at == expected_dtos[i].created_at
+            assert result[i].updated_at == expected_dtos[i].updated_at
+
         self.repository.find_by_user_id.assert_called_once_with(user_id)
         self.repository.find_all.assert_not_called()
 

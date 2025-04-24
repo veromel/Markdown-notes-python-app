@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock
 import uuid
-from src.notes.application.delete.delete_note_service import DeleteNoteService
-from src.notes.domain.repository import NoteRepository
+from src.notes.application.services.delete_note_service import DeleteNoteService
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.notes.domain.value_objects.id import Id
 from src.shared.domain.exceptions import AuthorizationException, NotFoundException
 
@@ -25,7 +25,7 @@ class TestDeleteNoteService:
         await self.service(note_id, user_id)
 
         self.repository.find_by_id.assert_called_once_with(Id(note_id))
-        self.repository.delete.assert_called_once_with(note_id)
+        self.repository.delete.assert_called_once_with(Id(note_id))
 
     @pytest.mark.asyncio
     async def test_delete_note_with_invalid_user_id(self, note):
@@ -69,4 +69,4 @@ class TestDeleteNoteService:
             await self.service(note_id, user_id)
 
         assert "Error deleting note" in str(excinfo.value)
-        self.repository.delete.assert_called_once_with(note_id)
+        self.repository.delete.assert_called_once_with(Id(note_id))

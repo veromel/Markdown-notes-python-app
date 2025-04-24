@@ -163,12 +163,34 @@ button:disabled {
     display: none; /* Se mostrará dinámicamente */
 }
 
+.error-container.loading {
+    background-color: #3498db; /* Color azul para indicar carga */
+    animation: pulse 1.5s infinite ease-in-out; /* Animación pulsante */
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
 #errors {
-    color: #ff4d4d;
+    color: white; /* Cambiado a blanco para que sea visible sobre fondo rojo */
     font-size: 14px;
     margin: 10px 0;
     list-style-type: circle;
     padding-left: 20px;
+}
+
+#errors li {
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.2); /* Fondo semi-transparente para mejor contraste */
+    border-radius: 3px;
+}
+
+.error-container.loading #errors {
+    color: white; /* Texto en blanco cuando está cargando */
 }
 
 /* Saved routers list */
@@ -205,6 +227,7 @@ button:disabled {
     padding: 15px;
     border-radius: 6px;
     box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.5); /* Efecto de sombra */
+    display: none; /* Inicialmente oculto */
 }
 
 #note-content {
@@ -215,11 +238,33 @@ button:disabled {
     padding: 10px;
 }
 
+#note-content .note-title {
+    font-size: 1.5em;
+    color: #4CAF50;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+}
+
+#note-content .note-content {
+    white-space: pre-wrap; /* Preservar saltos de línea */
+    line-height: 1.5;
+}
+
 .note-buttons {
     display: flex;
     justify-content: space-between;
     gap: 10px;
     margin-top: 20px;
+}
+
+/* Note editor */
+.note-editor {
+    margin-bottom: 20px;
+    background-color: #2d2d2d;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.5);
 }
 
 /* Responsive design */

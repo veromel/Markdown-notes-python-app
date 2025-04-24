@@ -7,8 +7,8 @@ from src.users.application.dto.user_dto import (
     LoginInputDTO,
     UserOutputDTO,
 )
-from src.users.application.register_user import RegisterUserService
-from src.users.application.login_user import LoginUserService
+from src.users.application.services.register_user import RegisterUserService
+from src.users.application.services.login_user import LoginUserService
 from src.shared.domain.exceptions import (
     ValidationException,
     AuthenticationException,
@@ -24,6 +24,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 @users_router.post(
     "/users",
+    response_model=UserOutputDTO,
     status_code=status.HTTP_201_CREATED,
     responses=exception_responses(
         [ValidationException(), UnexpectedError()],
@@ -37,7 +38,6 @@ async def register_user(user_data: UserInputDTO):
 
 @users_router.post(
     "/auth/login",
-    response_model=dict,
     responses=exception_responses(
         [ValidationException(), AuthenticationException(), UnexpectedError()],
     ),
@@ -51,29 +51,21 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     login_service = inject.instance(LoginUserService)
     result = await login_service(login_data)
 
-    return {
-        "access_token": result.access_token,
-        "token_type": result.token_type,
-        "user": {
-            "id": result.user.id,
-            "email": result.user.email,
-            "name": result.user.name,
-        },
-    }
+    return result
 
 
 @users_router.get(
     "/auth/me",
-    response_model=dict,
+    response_model=UserOutputDTO,
     responses=exception_responses(
         [AuthenticationException(), UnexpectedError()],
     ),
 )
 async def get_current_user_info(user: User = Depends(get_current_user)):
-    return {
-        "id": str(user.id.value),
-        "email": user.email.value,
-        "name": user.name,
-        "created_at": user.created_at.isoformat() if user.created_at else None,
-        "updated_at": user.updated_at.isoformat() if user.updated_at else None,
-    }
+    return UserOutputDTO(
+        id=str(user.id.value),
+        email=user.email.value,
+        name=user.name,
+        created_at=user.created_at.isoformat() if user.created_at else None,
+        updated_at=user.updated_at.isoformat() if user.updated_at else None,
+    )

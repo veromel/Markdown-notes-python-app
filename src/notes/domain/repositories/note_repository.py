@@ -23,5 +23,9 @@ class NoteRepository(ABC):
         pass
 
     @abstractmethod
+    async def update(self, note: Note) -> None:
+        pass
+
+    @abstractmethod
     async def delete(self, id: Id) -> None:
         pass

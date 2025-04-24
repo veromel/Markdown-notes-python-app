@@ -3,6 +3,18 @@ const apiUrl = "http://127.0.0.1:8000";
 let currentNoteId = null;
 let selectedNote = null;
 let isSaving = false; // Flag para evitar múltiples envíos simultáneos
+let isEditMode = false; // Flag para controlar si estamos en modo edición
+let isDeleting = false; // Flag para evitar múltiples eliminaciones simultáneas
+
+// Función para limpiar el panel de errores
+function clearErrorPanel() {
+    const errorContainer = document.getElementById('error-container');
+    const errorsList = document.getElementById('errors');
+    
+    errorsList.innerHTML = '';
+    errorContainer.style.display = 'none';
+    errorContainer.classList.remove('loading');
+}
 
 // AUTENTICACIÓN Y GESTIÓN DE USUARIOS
 // Detectar si hay un token almacenado al cargar la página
@@ -64,6 +76,10 @@ function showAuthScreen() {
 function showMainApp() {
     document.getElementById('auth-container').style.display = 'none';
     document.getElementById('main-container').style.display = 'block';
+    
+    // Inicialmente, ocultar el visor de notas
+    document.getElementById('note-viewer').style.display = 'none';
+    
     loadNotes(); // Cargar las notas al iniciar sesión
 }
 
@@ -237,18 +253,27 @@ async function checkGrammar() {
     }
     
     try {
+        // Mostrar un mensaje de carga para indicar que el proceso está en curso
+        errorsList.innerHTML = '<li>Verificando gramática, por favor espera...</li>';
+        errorContainer.style.display = 'block';
+        
+        // Añadir una clase para indicar visualmente que está cargando
+        errorContainer.classList.add('loading');
+        
         const response = await fetchWithAuth(`${apiUrl}/api/v1/notes/check-grammar`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                title: noteTitle,
                 content: noteBody
             })
         });
         
         const data = await response.json();
+        
+        // Quitar la clase de carga una vez que se recibe la respuesta
+        errorContainer.classList.remove('loading');
         
         if (response.ok) {
             // Mostrar errores si los hay
@@ -269,6 +294,8 @@ async function checkGrammar() {
         }
         
     } catch (error) {
+        // Quitar la clase de carga en caso de error
+        errorContainer.classList.remove('loading');
         alert(`Error: ${error.message}`);
     }
 }
@@ -279,6 +306,9 @@ async function saveNote() {
     if (isSaving) {
         return;
     }
+    
+    // Limpiar el panel de errores
+    clearErrorPanel();
     
     const noteTitle = document.getElementById('note-title').value.trim();
     const noteBody = document.getElementById('note-body').value.trim();
@@ -299,23 +329,33 @@ async function saveNote() {
             ? `${apiUrl}/api/v1/notes/${currentNoteId}`
             : `${apiUrl}/api/v1/notes`;
         
+        // Construir el cuerpo de la solicitud según sea creación o actualización
+        let bodyData = {
+            title: noteTitle,
+            content: noteBody
+        };
+        
+        // Para actualizaciones, necesitamos incluir el ID en el cuerpo
+        if (method === 'PUT') {
+            bodyData.id = currentNoteId;
+            // El user_id se añadirá en el backend por el router
+        }
+        // No intentamos enviar el user_id desde el frontend, el backend lo manejará
+        
         const response = await fetchWithAuth(url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                title: noteTitle,
-                content: noteBody
-            })
+            body: JSON.stringify(bodyData)
         });
         
         const data = await response.json();
         
         if (response.ok) {
             // Si es una nota nueva, actualiza el ID actual con el ID real de la nota
-            if (!currentNoteId && data.id && data.id.value) {
-                currentNoteId = data.id.value;
+            if (!currentNoteId && data.id) {
+                currentNoteId = data.id;
             }
             
             // Mostrar un solo mensaje de confirmación según sea una creación o actualización
@@ -325,8 +365,24 @@ async function saveNote() {
                 document.getElementById('note-title').value = '';
                 document.getElementById('note-body').value = '';
                 currentNoteId = null;
+                
+                // Ocultar el visor, ya que no hay nota que ver
+                document.getElementById('note-viewer').style.display = 'none';
             } else {
                 alert("¡Nota actualizada correctamente!");
+                
+                // Si estábamos en modo edición, actualizar la vista
+                if (isEditMode) {
+                    // Actualizar el visor con los datos actualizados
+                    document.querySelector('#note-content .note-title').innerHTML = '<strong>' + noteTitle + '</strong>';
+                    document.querySelector('#note-content .note-content').textContent = noteBody;
+                    
+                    // Limpiar el formulario de edición pero mantenerlo visible
+                    document.getElementById('note-title').value = '';
+                    document.getElementById('note-body').value = '';
+                    
+                    isEditMode = false;
+                }
             }
             
             // Recargar la lista de notas
@@ -362,15 +418,21 @@ async function loadNotes() {
             
             // Crear botones para cada nota
             data.forEach(note => {
+                // Verificar que la nota tiene un ID válido
+                if (!note.id || note.id === "undefined") {
+                    console.error("Nota con ID inválido encontrada:", note);
+                    return; // Saltar esta nota
+                }
+                
                 const button = document.createElement('button');
                 button.className = 'note-item';
-                // Acceder al valor de title dentro del objeto title
-                button.textContent = note.title.value;
-                // Acceder al valor de id dentro del objeto id
-                button.dataset.id = note.id.value;
+                // Usar el título directamente como una propiedad simple
+                button.textContent = note.title;
+                // Usar el ID directamente como una propiedad simple
+                button.dataset.id = note.id;
                 
                 // Si es la nota actual, marcarla como seleccionada
-                if (note.id.value === currentNoteId) {
+                if (note.id === currentNoteId) {
                     button.classList.add('selected');
                     selectedNote = button;
                 }
@@ -393,6 +455,9 @@ async function loadNotes() {
 // Función para ver el contenido de una nota
 async function viewNote(noteButton) {
     try {
+        // Limpiar el panel de errores
+        clearErrorPanel();
+        
         // Desmarcar la nota previamente seleccionada
         if (selectedNote) {
             selectedNote.classList.remove('selected');
@@ -404,16 +469,29 @@ async function viewNote(noteButton) {
         
         const noteId = noteButton.dataset.id;
         
+        // Verificar que el ID sea válido antes de hacer la petición
+        if (!noteId || noteId === "undefined") {
+            throw new Error("ID de nota inválido o no especificado");
+        }
+        
         const response = await fetchWithAuth(`${apiUrl}/api/v1/notes/${noteId}`);
         const data = await response.json();
         
         if (response.ok) {
-            // Actualizar el formulario con los datos de la nota
-            document.getElementById('note-title').value = data.title.value;
-            document.getElementById('note-body').value = data.content.value;
+            // Mostrar el visor
+            document.getElementById('note-viewer').style.display = 'block';
+            
+            // Actualizar el visor con los datos de la nota
+            document.querySelector('#note-content .note-title').innerHTML = '<strong>' + data.title + '</strong>';
+            document.querySelector('#note-content .note-content').textContent = data.content;
+            
+            // Limpiar el formulario de edición pero mantenerlo visible
+            document.getElementById('note-title').value = '';
+            document.getElementById('note-body').value = '';
             
             // Actualizar el ID de la nota actual
             currentNoteId = noteId;
+            isEditMode = false;
         } else {
             throw new Error(data.detail || "Error al cargar la nota");
         }
@@ -425,16 +503,25 @@ async function viewNote(noteButton) {
 
 // Función para eliminar una nota
 async function deleteNote() {
-    if (!currentNoteId) {
-        alert("Por favor, selecciona una nota para eliminar.");
+    // Si ya hay una operación de eliminación en curso o no hay nota seleccionada, ignoramos esta solicitud
+    if (isDeleting || !currentNoteId) {
+        if (!currentNoteId) {
+            alert("Por favor, selecciona una nota para eliminar.");
+        }
         return;
     }
+    
+    // Limpiar el panel de errores
+    clearErrorPanel();
     
     if (!confirm("¿Estás seguro de que deseas eliminar esta nota?")) {
         return;
     }
     
     try {
+        // Marcamos que hay una operación de eliminación en curso
+        isDeleting = true;
+        
         const response = await fetchWithAuth(`${apiUrl}/api/v1/notes/${currentNoteId}`, {
             method: 'DELETE'
         });
@@ -442,35 +529,58 @@ async function deleteNote() {
         if (response.ok) {
             alert("¡Nota eliminada correctamente!");
             
-            // Limpiar formulario
+            // Limpiar formulario y variables
             document.getElementById('note-title').value = '';
             document.getElementById('note-body').value = '';
             currentNoteId = null;
             selectedNote = null;
+            isEditMode = false;
+            
+            // Ocultar el visor
+            document.getElementById('note-viewer').style.display = 'none';
             
             // Recargar notas
             loadNotes();
         } else {
-            const data = await response.json();
-            throw new Error(data.detail || "Error al eliminar la nota");
+            // Intentar obtener detalles del error
+            try {
+                const data = await response.json();
+                throw new Error(data.detail || "Error al eliminar la nota");
+            } catch (jsonError) {
+                // Si no puede procesar el JSON, usar el status text
+                throw new Error(`Error al eliminar la nota: ${response.statusText}`);
+            }
         }
         
     } catch (error) {
         alert(`Error: ${error.message}`);
+    } finally {
+        // Independientemente del resultado, marcamos que la operación ha terminado
+        isDeleting = false;
     }
 }
 
 // Función para crear una nueva nota (limpiar formulario)
 function newNote() {
+    // Limpiar el panel de errores
+    clearErrorPanel();
+    
+    // Limpiar el formulario
     document.getElementById('note-title').value = '';
     document.getElementById('note-body').value = '';
     currentNoteId = null;
+    
+    // Ocultar el visor
+    document.getElementById('note-viewer').style.display = 'none';
     
     // Desmarcar nota seleccionada
     if (selectedNote) {
         selectedNote.classList.remove('selected');
         selectedNote = null;
     }
+    
+    // Cambiar a modo creación
+    isEditMode = false;
 }
 
 // Función auxiliar para extraer el ID de una nota de manera segura
@@ -513,8 +623,25 @@ function logout() {
 
 // Función para editar una nota
 function editNote() {
-    // Esta función no es necesaria ya que la selección de la nota ya carga el contenido en el editor
-    alert("Ya estás en modo de edición. Modifica el contenido y guarda los cambios.");
+    // Limpiar el panel de errores
+    clearErrorPanel();
+    
+    // Solo podemos editar si hay una nota seleccionada
+    if (!currentNoteId) {
+        alert("Por favor, selecciona una nota para editar.");
+        return;
+    }
+    
+    // Obtener los datos del visor
+    const title = document.querySelector('#note-content .note-title').textContent;
+    const content = document.querySelector('#note-content .note-content').textContent;
+    
+    // Cargar los datos en el editor
+    document.getElementById('note-title').value = title;
+    document.getElementById('note-body').value = content;
+    
+    // Cambiar a modo edición
+    isEditMode = true;
 }
 
 // Asignar eventos a los botones una vez que el DOM está listo
@@ -530,8 +657,11 @@ document.addEventListener('DOMContentLoaded', function() {
         saveNoteBtn.addEventListener('click', saveNote);
     }
     
+    // No añadimos event listener para deleteNote, ya que se maneja con onclick en HTML
+    /* 
     const deleteNoteBtn = document.getElementById('delete-note');
     if (deleteNoteBtn) {
         deleteNoteBtn.addEventListener('click', deleteNote);
     }
+    */
 });

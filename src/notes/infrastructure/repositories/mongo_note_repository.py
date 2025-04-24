@@ -5,7 +5,7 @@ from uuid import UUID
 from pymongo.collection import Collection
 
 from src.notes.domain.note import Note
-from src.notes.domain.repository import NoteRepository
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.notes.domain.value_objects.id import Id
 from src.notes.infrastructure.repositories.schema import NoteSchema
 
@@ -45,8 +45,13 @@ class MongoNoteRepository(NoteRepository):
 
         await self.collection.update_one({"_id": binary_id}, {"$set": update_data})
 
-    async def delete(self, note_id: str) -> None:
-        uuid_obj = UUID(note_id)
+    async def delete(self, note_id: Id) -> None:
+        if isinstance(note_id, Id):
+            note_id_str = note_id.value
+        else:
+            note_id_str = str(note_id)
+
+        uuid_obj = UUID(note_id_str)
         binary_uuid = Binary.from_uuid(uuid_obj)
 
         await self.collection.delete_one({"_id": binary_uuid})

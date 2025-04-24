@@ -1,6 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from src.notes.domain.repository import NoteRepository
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.notes.infrastructure.repositories.mongo_note_repository import (
     MongoNoteRepository,
 )

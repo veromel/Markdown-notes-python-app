@@ -1,10 +1,11 @@
 import pytest
 import uuid
-from unittest.mock import AsyncMock, MagicMock
-from src.notes.application.update.update_note_service import UpdateNoteService
-from src.notes.domain.repository import NoteRepository
-from src.notes.domain.note import Note
+from unittest.mock import AsyncMock
+from pydantic import ValidationError
+from src.notes.application.services.update_note_service import UpdateNoteService
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.notes.domain.value_objects.id import Id
+from src.notes.application.dto.note_dto import NoteUpdateInputDTO
 from src.shared.domain.exceptions import (
     ValidationException,
     NotFoundException,
@@ -29,7 +30,10 @@ class TestUpdateNoteService:
 
         self.repository.find_by_id.return_value = sample_note
 
-        await self.service(note_id, new_title, new_content, user_id)
+        input_dto = NoteUpdateInputDTO(
+            id=note_id, title=new_title, content=new_content, user_id=user_id
+        )
+        await self.service(input_dto)
 
         self.repository.find_by_id.assert_called_once_with(Id(note_id))
         self.repository.update.assert_called_once()
@@ -49,7 +53,10 @@ class TestUpdateNoteService:
         self.repository.find_by_id.return_value = None
 
         with pytest.raises(NotFoundException) as excinfo:
-            await self.service(note_id, new_title, new_content, user_id)
+            input_dto = NoteUpdateInputDTO(
+                id=note_id, title=new_title, content=new_content, user_id=user_id
+            )
+            await self.service(input_dto)
 
         assert isinstance(excinfo.value, NotFoundException)
         self.repository.find_by_id.assert_called_once_with(Id(note_id))
@@ -67,7 +74,10 @@ class TestUpdateNoteService:
         self.repository.update.side_effect = Exception("Error updating note")
 
         with pytest.raises(Exception) as excinfo:
-            await self.service(note_id, new_title, new_content, user_id)
+            input_dto = NoteUpdateInputDTO(
+                id=note_id, title=new_title, content=new_content, user_id=user_id
+            )
+            await self.service(input_dto)
 
         assert "Error updating note" in str(excinfo.value)
         self.repository.find_by_id.assert_called_once_with(Id(note_id))
@@ -84,7 +94,13 @@ class TestUpdateNoteService:
         self.repository.find_by_id.return_value = sample_note
 
         with pytest.raises(AuthorizationException) as excinfo:
-            await self.service(note_id, new_title, new_content, invalid_user_id)
+            input_dto = NoteUpdateInputDTO(
+                id=note_id,
+                title=new_title,
+                content=new_content,
+                user_id=invalid_user_id,
+            )
+            await self.service(input_dto)
 
         assert isinstance(excinfo.value, AuthorizationException)
         self.repository.find_by_id.assert_called_once_with(Id(note_id))
@@ -100,11 +116,12 @@ class TestUpdateNoteService:
 
         self.repository.find_by_id.return_value = sample_note
 
-        with pytest.raises(ValidationException) as excinfo:
-            await self.service(note_id, empty_title, new_content, user_id)
+        with pytest.raises(ValidationError):
+            input_dto = NoteUpdateInputDTO(
+                id=note_id, title=empty_title, content=new_content, user_id=user_id
+            )
 
-        assert isinstance(excinfo.value, ValidationException)
-        self.repository.find_by_id.assert_called_once_with(Id(note_id))
+        self.repository.find_by_id.assert_not_called()
         self.repository.update.assert_not_called()
 
     @pytest.mark.asyncio
@@ -117,9 +134,10 @@ class TestUpdateNoteService:
 
         self.repository.find_by_id.return_value = sample_note
 
-        with pytest.raises(ValidationException) as excinfo:
-            await self.service(note_id, new_title, empty_content, user_id)
+        with pytest.raises(ValidationError):
+            input_dto = NoteUpdateInputDTO(
+                id=note_id, title=new_title, content=empty_content, user_id=user_id
+            )
 
-        assert isinstance(excinfo.value, ValidationException)
-        self.repository.find_by_id.assert_called_once_with(Id(note_id))
+        self.repository.find_by_id.assert_not_called()
         self.repository.update.assert_not_called()

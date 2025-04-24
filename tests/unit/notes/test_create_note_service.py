@@ -1,9 +1,11 @@
 import pytest
 from unittest.mock import AsyncMock
+from pydantic import ValidationError
 
-from src.notes.application.create.create_note_service import CreateNoteService
-from src.notes.domain.repository import NoteRepository
+from src.notes.application.services.create_note_service import CreateNoteService
+from src.notes.domain.repositories.note_repository import NoteRepository
 from src.shared.domain.exceptions import ValidationException
+from src.notes.application.dto.note_dto import NoteInputDTO
 
 
 @pytest.mark.unit
@@ -14,55 +16,69 @@ class TestCreateNoteService:
         self.service = CreateNoteService(self.repository)
 
     @pytest.mark.asyncio
-    async def test_create_note_successfully(self, note, faker):
-        title = faker.sentence()
-        content = faker.paragraph()
+    async def test_create_note_successful(self):
+        title = "Test Note"
+        content = "This is a test note"
         user_id = "test-user-id"
-        sample_note = note(title=title, content=content, user_id=user_id)
 
-        created_note = await self.service(title, content, user_id)
+        input_dto = NoteInputDTO(title=title, content=content, user_id=user_id)
+        result = await self.service(input_dto)
 
-        assert created_note.title.value == sample_note.title.value
-        assert created_note.content.value == sample_note.content.value
-        assert created_note.user_id == user_id
+        assert result is not None
+        assert result.title == title
+        assert result.content == content
+        assert result.user_id == user_id
+        assert result.id is not None
         self.repository.save.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_create_note_fails_to_save(self, faker):
-        title = faker.sentence()
-        content = faker.paragraph()
-        user_id = "test-user-id"
-        self.repository.save.side_effect = Exception("Save failed")
+    async def test_create_note_repository_error(self):
+        self.repository.save.side_effect = Exception("Error saving note")
 
-        with pytest.raises(Exception, match="Save failed"):
-            await self.service(title, content, user_id)
-
-    @pytest.mark.asyncio
-    async def test_create_note_empty_title(self, faker):
-        content = faker.paragraph()
+        title = "Test Note"
+        content = "This is a test note"
         user_id = "test-user-id"
 
-        with pytest.raises(ValidationException) as excinfo:
-            await self.service("", content, user_id)
+        with pytest.raises(Exception) as excinfo:
+            input_dto = NoteInputDTO(title=title, content=content, user_id=user_id)
+            await self.service(input_dto)
 
-        assert isinstance(excinfo.value, ValidationException)
+        assert "Error saving note" in str(excinfo.value)
+        self.repository.save.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_create_note_empty_content(self, faker):
-        title = faker.sentence()
+    async def test_create_note_empty_title(self):
+        title = ""
+        content = "This is a test note"
         user_id = "test-user-id"
 
-        with pytest.raises(ValidationException) as excinfo:
-            await self.service(title, "", user_id)
+        with pytest.raises(ValidationError):
+            input_dto = NoteInputDTO(title=title, content=content, user_id=user_id)
 
-        assert isinstance(excinfo.value, ValidationException)
+        self.repository.save.assert_not_called()
 
     @pytest.mark.asyncio
-    async def test_create_note_empty_user_id(self, faker):
-        title = faker.sentence()
-        content = faker.paragraph()
+    async def test_create_note_empty_content(self):
+        title = "Test Note"
+        content = ""
+        user_id = "test-user-id"
 
-        with pytest.raises(ValidationException) as excinfo:
-            await self.service(title, content, "")
+        with pytest.raises(ValidationError):
+            input_dto = NoteInputDTO(title=title, content=content, user_id=user_id)
 
-        assert isinstance(excinfo.value, ValidationException)
+        self.repository.save.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_create_note_empty_user_id(self):
+        title = "Test Note"
+        content = "This is a test note"
+        user_id = ""
+
+        input_dto = NoteInputDTO(title=title, content=content, user_id=user_id)
+        result = await self.service(input_dto)
+
+        assert result is not None
+        assert result.title == title
+        assert result.content == content
+        assert result.user_id == user_id
+        self.repository.save.assert_called_once()

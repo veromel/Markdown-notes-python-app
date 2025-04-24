@@ -54,7 +54,7 @@ class TestNoteRepository:
         sample_note = await persisted_note()
         note_id = sample_note.id.value
 
-        await note_repository.delete(note_id)
+        await note_repository.delete(Id(note_id))
 
         deleted_note = await note_repository.find_by_id(Id(note_id))
         assert deleted_note is None
